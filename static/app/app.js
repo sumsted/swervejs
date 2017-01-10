@@ -21,9 +21,9 @@ var app = {
     },
 
     'resetBot': function () {
-        app.dimensions.track = $("#track").val();
-        app.dimensions.wheelbase = $("#wheelbase").val();
-        app.scale = $("#scale").val();
+        app.dimensions.track = parseFloat($("#track").val());
+        app.dimensions.wheelbase = parseFloat($("#wheelbase").val());
+        app.scale = parseFloat($("#scale").val());
 
         app.wheelPlacement.rf = [app.dimensions.track, app.dimensions.wheelbase];
         app.wheelPlacement.lf = [0, app.dimensions.wheelbase];
@@ -38,18 +38,19 @@ var app = {
 
     'move': function () {
         // get fwd, str, rcw
-        var fwd = $("#fwd").val();
-        var str = $("#str").val();;
-        var rcw = $("#rcw").val();;
+        var fwd = parseFloat($("#fwd").val());
+        var str = parseFloat($("#str").val());
+        var rcw = parseFloat($("#rcw").val());
+
 
         // calc swerve
         var swerve = app.swervinatorCalculator(fwd, str, rcw);
 
         // recaclulate new positions
-        app.wheelPlacement.rf = app.newCoordiates(app.wheelPlacement.lf, swerve[4], swerve[0]);
+        app.wheelPlacement.rf = app.newCoordiates(app.wheelPlacement.rf, swerve[4], swerve[0]);
         app.wheelPlacement.lf = app.newCoordiates(app.wheelPlacement.lf, swerve[5], swerve[1]);
-        app.wheelPlacement.lr = app.newCoordiates(app.wheelPlacement.lf, swerve[6], swerve[2]);
-        app.wheelPlacement.rr = app.newCoordiates(app.wheelPlacement.lf, swerve[7], swerve[3]);
+        app.wheelPlacement.lr = app.newCoordiates(app.wheelPlacement.lr, swerve[6], swerve[2]);
+        app.wheelPlacement.rr = app.newCoordiates(app.wheelPlacement.rr, swerve[7], swerve[3]);
 
         // update table
         $("#rfv").text(swerve[0]);
@@ -77,7 +78,7 @@ var app = {
         // todo: rotate origin 90d cw and to center left
         s.forEach(function (coordinates, i, array) {
             array[i][0] = 500 + array[i][0];
-            array[i][1] = 1000 - array[i][1];
+            array[i][1] = 500 - array[i][1];
         });
         return s;
     },
@@ -103,6 +104,10 @@ var app = {
     },
 
     'swervinatorCalculator': function (fwd, str, rcw) {
+        fwd = parseFloat(fwd);
+        str = parseFloat(str);
+        rcw = parseFloat(rcw);
+        
         var r = Math.sqrt(Math.pow(app.dimensions.wheelbase, 2) + Math.pow(app.dimensions.track, 2));
 
         var a = str - rcw * (app.dimensions.wheelbase / r);
