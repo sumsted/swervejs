@@ -76,8 +76,8 @@ var app = {
         // moving origin to center bottom
         // todo: rotate origin 90d cw and to center left
         s.forEach(function (coordinates, i, array) {
-            coordinates[0] = 500 - coordinates[0];
-            coordinates[1] = 1000 - coordinates[1];
+            array[i][0] = 500 + array[i][0];
+            array[i][1] = 1000 - array[i][1];
         });
         return s;
     },
