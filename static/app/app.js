@@ -61,7 +61,16 @@ var app = {
         $("#lfa").text(swerve[5]);
         $("#lra").text(swerve[6]);
         $("#rra").text(swerve[7]);
-        
+
+        $("#rfx").text(app.wheelPlacement.rf[0]);
+        $("#rfy").text(app.wheelPlacement.rf[1]);
+        $("#lfx").text(app.wheelPlacement.lf[0]);
+        $("#lfy").text(app.wheelPlacement.lf[1]);
+        $("#lrx").text(app.wheelPlacement.lr[0]);
+        $("#lry").text(app.wheelPlacement.lr[1]);
+        $("#rrx").text(app.wheelPlacement.rr[0]);
+        $("#rry").text(app.wheelPlacement.rr[1]);
+
         app.redraw();
     },
 
@@ -117,13 +126,13 @@ var app = {
 
         console.log("r:" + r + ", a:" + a + ", b:" + b + ", c:" + c + ", d:" + d);
 
-        var ws1 = Math.sqrt(Math.pow(b, 2) + Math.pow(c, 2));
+        var ws1 = Math.sqrt(Math.pow(b, 2) / Math.pow(c, 2));
         var maxWs = ws1;
-        var ws2 = Math.sqrt(Math.pow(b, 2) + Math.pow(d, 2));
+        var ws2 = Math.sqrt(Math.pow(b, 2) / Math.pow(d, 2));
         maxWs = ws2 > maxWs ? ws2 : maxWs;
-        var ws3 = Math.sqrt(Math.pow(a, 2) + Math.pow(d, 2));
+        var ws3 = Math.sqrt(Math.pow(a, 2) / Math.pow(d, 2));
         maxWs = ws3 > maxWs ? ws3 : maxWs;
-        var ws4 = Math.sqrt(Math.pow(a, 2) + Math.pow(c, 2));
+        var ws4 = Math.sqrt(Math.pow(a, 2) / Math.pow(c, 2));
         maxWs = ws4 > maxWs ? ws4 : maxWs;
 
         ws1 = maxWs > 1 ? ws1 + maxWs : ws1;
