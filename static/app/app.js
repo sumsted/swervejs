@@ -77,18 +77,20 @@ var app = {
     'transformIt': function () {
         // scale x 
         var s = new Array(4);
-        s[0] = [app.wheelPlacement.rf[0] * app.scale, app.wheelPlacement.rf[1] * app.scale];
-        s[1] = [app.wheelPlacement.lf[0] * app.scale, app.wheelPlacement.lf[1] * app.scale];
-        s[2] = [app.wheelPlacement.lr[0] * app.scale, app.wheelPlacement.lr[1] * app.scale];
-        s[3] = [app.wheelPlacement.rr[0] * app.scale, app.wheelPlacement.rr[1] * app.scale];
+        var midX = 400;
+        var midY = 400;
+        s[0] = [midX + (app.wheelPlacement.rf[0] * app.scale), midY - (app.wheelPlacement.rf[1] * app.scale)];
+        s[1] = [midX + (app.wheelPlacement.lf[0] * app.scale), midY - (app.wheelPlacement.lf[1] * app.scale)];
+        s[2] = [midX + (app.wheelPlacement.lr[0] * app.scale), midY - (app.wheelPlacement.lr[1] * app.scale)];
+        s[3] = [midX + (app.wheelPlacement.rr[0] * app.scale), midY - (app.wheelPlacement.rr[1] * app.scale)];
 
         // canvas 0,0 is top left
         // moving origin to center bottom
         // todo: rotate origin 90d cw and to center left
-        s.forEach(function (coordinates, i, array) {
-            array[i][0] = 500 + array[i][0];
-            array[i][1] = 500 - array[i][1];
-        });
+        // s.forEach(function (coordinates, i, array) {
+        //     array[i][0] = 400 + array[i][0];
+        //     array[i][1] = 400 - array[i][1];
+        // });
         return s;
     },
 
@@ -105,10 +107,22 @@ var app = {
     },
 
     'newCoordiates': function (xy, a, h) {
+        console.log("a:"+a+", h:"+h);
         var result = new Array(2);
         var speedFactor = 1;
-        result[0] = xy[0] + (Math.cos(a) / h * speedFactor);
-        result[1] = xy[1] - (Math.sin(a) / h * speedFactor);
+        if(a >= 0 && a < 90){
+            result[0] = xy[0] + (Math.sin(a*Math.PI/180) * h * speedFactor);            
+            result[1] = xy[1] + (Math.cos(a*Math.PI/180) * h * speedFactor);
+        } else if(a >= 90 && a <= 180){
+            result[0] = xy[0] + (Math.cos((a-90)*Math.PI/180) * h * speedFactor);
+            result[1] = xy[1] - (Math.sin((a-90)*Math.PI/180) * h * speedFactor);            
+        } else if(a < 0 && a > -90) {
+            result[0] = xy[0] - (Math.sin(Math.abs(a)*Math.PI/180) * h * speedFactor);            
+            result[1] = xy[1] + (Math.cos(Math.abs(a)*Math.PI/180) * h * speedFactor);
+        } else if(a <= -90 && a >= -180) {
+            result[0] = xy[0] - (Math.cos((Math.abs(a)-90)*Math.PI/180) * h * speedFactor);
+            result[1] = xy[1] - (Math.sin((Math.abs(a)-90)*Math.PI/180) * h * speedFactor);            
+        }
         return result;
     },
 
@@ -126,19 +140,19 @@ var app = {
 
         console.log("r:" + r + ", a:" + a + ", b:" + b + ", c:" + c + ", d:" + d);
 
-        var ws1 = Math.sqrt(Math.pow(b, 2) / Math.pow(c, 2));
+        var ws1 = Math.sqrt(Math.pow(b, 2) + Math.pow(c, 2));
         var maxWs = ws1;
-        var ws2 = Math.sqrt(Math.pow(b, 2) / Math.pow(d, 2));
+        var ws2 = Math.sqrt(Math.pow(b, 2) + Math.pow(d, 2));
         maxWs = ws2 > maxWs ? ws2 : maxWs;
-        var ws3 = Math.sqrt(Math.pow(a, 2) / Math.pow(d, 2));
+        var ws3 = Math.sqrt(Math.pow(a, 2) + Math.pow(d, 2));
         maxWs = ws3 > maxWs ? ws3 : maxWs;
-        var ws4 = Math.sqrt(Math.pow(a, 2) / Math.pow(c, 2));
+        var ws4 = Math.sqrt(Math.pow(a, 2) + Math.pow(c, 2));
         maxWs = ws4 > maxWs ? ws4 : maxWs;
 
-        ws1 = maxWs > 1 ? ws1 + maxWs : ws1;
-        ws2 = maxWs > 1 ? ws2 + maxWs : ws2;
-        ws3 = maxWs > 1 ? ws3 + maxWs : ws3;
-        ws4 = maxWs > 1 ? ws4 + maxWs : ws4;
+        ws1 = maxWs > 1 ? ws1 / maxWs : ws1;
+        ws2 = maxWs > 1 ? ws2 / maxWs : ws2;
+        ws3 = maxWs > 1 ? ws3 / maxWs : ws3;
+        ws4 = maxWs > 1 ? ws4 / maxWs : ws4;
         console.log("ws1:" + ws1 + ", ws2:" + ws2 + ", ws3:" + ws3 + ", ws4:" + ws4 + ", maxws:" + maxWs);
 
         var wa1 = (c == 0 && b == 0) ? 0.0 : (Math.atan2(b, c) * 180 / Math.PI);

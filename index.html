@@ -14,49 +14,45 @@
 
 </head>
 
-<body>
+<body style="background-color:rgb(100, 100, 255);color:#fff">
     <div class="container">
         <div class="row">
             <div class="col-md-12 text-center">
                 <h3>Swerve</h3>
             </div>
         </div>
+        <div class="row" style="margin:10px 0 10px 0;">
+            <div class="col-xs-12">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="wheelbase">Wheelbase</label>
+                        <input type="text" class="form-control" id="wheelbase" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="track">Track</label>
+                        <input type="text" class="form-control" id="track" value="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="scale">Scale X's</label>
+                        <input type="text" class="form-control" id="scale" value="2">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-default" id="start">Set and Start</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-lg-8">
                 <div class="row">
                     <div class="col-xs-12 text-center">
-                        <canvas id="botland" width="1000" height="500" style="border:1px solid #999999" />
+                        <canvas id="botland" width="800" height="800" style="border:1px solid #999999; background-color:#fff;" />
                     </div>
                 </div>
+            </div>
+            <div class="col-lg-4">
                 <div class="row" style="margin-top:10px;">
-                    <div class="col-xs-4">
-                        <form class="form-horizontal">
-                            <div class="form-group">
-                                <label class="control-label col-xs-4" for="wheelbase">Wheelbase</label>
-                                <div class="col-xs-8">
-                                    <input type="text" class="form-control" id="wheelbase" value="30">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-xs-4" for="track">Track</label>
-                                <div class="col-xs-8">
-                                    <input type="text" class="form-control" id="track" value="20">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-xs-4" for="scale">Scale X's</label>
-                                <div class="col-xs-8">
-                                    <input type="text" class="form-control" id="scale" value="2">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <div class="col-xs-offset-4 col-sm-8">
-                                    <button type="button" class="btn btn-default" id="start">Set and Start</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="col-xs-4">
+                    <div class="col-xs-12">
                         <form class="form-horizontal">
                             <div class="form-group">
                                 <label class="control-label col-xs-4" for="fwd">Forward</label>
@@ -83,7 +79,7 @@
                             </div>
                         </form>
                     </div>
-                    <div class="col-xs-4">
+                    <div class="col-xs-12">
                         <table class="table">
                             <tr>
                                 <th>Vectors</th>
