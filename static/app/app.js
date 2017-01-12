@@ -42,11 +42,10 @@ var app = {
         var str = parseFloat($("#str").val());
         var rcw = parseFloat($("#rcw").val());
 
-
         // calc swerve
-        var swerve = app.swervinatorCalculator(fwd, str, rcw);
+        var swerve = app.swerveCalc(fwd, str, rcw);
 
-        // recaclulate new positions
+        // recaclulate new positions for canvas
         app.wheelPlacement.rf = app.newCoordiates(app.wheelPlacement.rf, swerve[4], swerve[0]);
         app.wheelPlacement.lf = app.newCoordiates(app.wheelPlacement.lf, swerve[5], swerve[1]);
         app.wheelPlacement.lr = app.newCoordiates(app.wheelPlacement.lr, swerve[6], swerve[2]);
@@ -71,11 +70,15 @@ var app = {
         $("#rrx").text(app.wheelPlacement.rr[0]);
         $("#rry").text(app.wheelPlacement.rr[1]);
 
+        $("#rflf").text(app.distance(app.wheelPlacement.rf,app.wheelPlacement.lf));
+        $("#lflr").text(app.distance(app.wheelPlacement.lf,app.wheelPlacement.lr));
+        $("#lrrr").text(app.distance(app.wheelPlacement.lr,app.wheelPlacement.rr));
+        $("#rrrf").text(app.distance(app.wheelPlacement.rr,app.wheelPlacement.rf));
+
         app.redraw();
     },
 
     'transformIt': function () {
-        // scale x 
         var s = new Array(4);
         var midX = 400;
         var midY = 400;
@@ -83,14 +86,6 @@ var app = {
         s[1] = [midX + (app.wheelPlacement.lf[0] * app.scale), midY - (app.wheelPlacement.lf[1] * app.scale)];
         s[2] = [midX + (app.wheelPlacement.lr[0] * app.scale), midY - (app.wheelPlacement.lr[1] * app.scale)];
         s[3] = [midX + (app.wheelPlacement.rr[0] * app.scale), midY - (app.wheelPlacement.rr[1] * app.scale)];
-
-        // canvas 0,0 is top left
-        // moving origin to center bottom
-        // todo: rotate origin 90d cw and to center left
-        // s.forEach(function (coordinates, i, array) {
-        //     array[i][0] = 400 + array[i][0];
-        //     array[i][1] = 400 - array[i][1];
-        // });
         return s;
     },
 
@@ -109,7 +104,7 @@ var app = {
     'newCoordiates': function (xy, a, h) {
         console.log("a:"+a+", h:"+h);
         var result = new Array(2);
-        var speedFactor = 1;
+        var speedFactor = .5;
         if(a >= 0 && a < 90){
             result[0] = xy[0] + (Math.sin(a*Math.PI/180) * h * speedFactor);            
             result[1] = xy[1] + (Math.cos(a*Math.PI/180) * h * speedFactor);
@@ -126,18 +121,20 @@ var app = {
         return result;
     },
 
-    'swervinatorCalculator': function (fwd, str, rcw) {
-        fwd = parseFloat(fwd);
-        str = parseFloat(str);
-        rcw = parseFloat(rcw);
+    'distance': function(c1,c2){
+        return Math.sqrt(Math.pow(c2[0]-c1[0],2)+Math.pow(c2[1]-c1[1],2));
+    },
+
+    'swerveCalc': function (fwd, str, rcw) {
+        fwd = fwd;
+        str = str;
+        rcw = rcw;
         
         var r = Math.sqrt(Math.pow(app.dimensions.wheelbase, 2) + Math.pow(app.dimensions.track, 2));
-
         var a = str - rcw * (app.dimensions.wheelbase / r);
         var b = str + rcw * (app.dimensions.wheelbase / r);
         var c = fwd - rcw * (app.dimensions.track / r);
         var d = fwd + rcw * (app.dimensions.track / r);
-
         console.log("r:" + r + ", a:" + a + ", b:" + b + ", c:" + c + ", d:" + d);
 
         var ws1 = Math.sqrt(Math.pow(b, 2) + Math.pow(c, 2));
