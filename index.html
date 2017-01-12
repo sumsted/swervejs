@@ -51,6 +51,34 @@
                 </div>
             </div>
             <div class="col-lg-4">
+                <div class="row">
+                    <div class="col-xs-4">
+                        <input id="fwd_slider_id" type="range" min="-10" max="10" step="1" value="0" style="-webkit-transform: rotate(270deg); " onchange="$('#fwd_label_id').html(this.value/10)" />
+                        <span id="fwd_label_id">0</span>
+                    </div>
+                    <div class="col-xs-8">
+                        <div class="row">
+                            <div class="col-xs-12">
+
+                                <input id="str_slider" type="range" min="-10" max="10" step="1" value="0" onchange="$('#str_label_id').html(this.value/10)" />
+                                <span id="str_label_id">0</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <input id="rcw_slider" type="range" min="-10" max="10" step="1" value="0" onchange="$('#rcw_label_id').html(this.value/10)" />
+                                <span id="rcw_label_id">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8">
+                        <input id="steps_slider" type="range" min="1" max="10" step="1" value="0" onchange="$('#steps_label_id').html(this.value)" />
+                        <span id="steps_label_id">0</span>
+                    </div>
+                    <div class="col-xs-4">button</div>
+                </div>
                 <div class="row" style="margin-top:10px;">
                     <div class="col-xs-12">
                         <form class="form-horizontal">
