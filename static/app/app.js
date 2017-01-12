@@ -10,68 +10,105 @@ var app = {
         'lr': [0, 0],
         'rr': [0, 0]
     },
+    
+    // calculate angle and proportional speed of each drive unit
+    // model found on the chiefdelphi site
+    'swerveCalc': function (fwd, str, rcw) {
+        var r = Math.sqrt(Math.pow(app.dimensions.wheelbase, 2) + Math.pow(app.dimensions.track, 2));
+        var a = str - rcw * (app.dimensions.wheelbase / r);
+        var b = str + rcw * (app.dimensions.wheelbase / r);
+        var c = fwd - rcw * (app.dimensions.track / r);
+        var d = fwd + rcw * (app.dimensions.track / r);
+        console.log("r:" + r + ", a:" + a + ", b:" + b + ", c:" + c + ", d:" + d);
+
+        var ws1 = Math.sqrt(Math.pow(b, 2) + Math.pow(c, 2));
+        var maxWs = ws1;
+        var ws2 = Math.sqrt(Math.pow(b, 2) + Math.pow(d, 2));
+        maxWs = ws2 > maxWs ? ws2 : maxWs;
+        var ws3 = Math.sqrt(Math.pow(a, 2) + Math.pow(d, 2));
+        maxWs = ws3 > maxWs ? ws3 : maxWs;
+        var ws4 = Math.sqrt(Math.pow(a, 2) + Math.pow(c, 2));
+        maxWs = ws4 > maxWs ? ws4 : maxWs;
+
+        ws1 = maxWs > 1 ? ws1 / maxWs : ws1;
+        ws2 = maxWs > 1 ? ws2 / maxWs : ws2;
+        ws3 = maxWs > 1 ? ws3 / maxWs : ws3;
+        ws4 = maxWs > 1 ? ws4 / maxWs : ws4;
+        console.log("ws1:" + ws1 + ", ws2:" + ws2 + ", ws3:" + ws3 + ", ws4:" + ws4 + ", maxws:" + maxWs);
+
+        var wa1 = (c == 0 && b == 0) ? 0.0 : (Math.atan2(b, c) * 180 / Math.PI);
+        var wa2 = (d == 0 && b == 0) ? 0.0 : (Math.atan2(b, d) * 180 / Math.PI);
+        var wa3 = (d == 0 && a == 0) ? 0.0 : (Math.atan2(a, d) * 180 / Math.PI);
+        var wa4 = (c == 0 && a == 0) ? 0.0 : (Math.atan2(a, c) * 180 / Math.PI);
+        console.log("wa1:" + wa1 + ", wa2:" + wa2 + ", wa3:" + wa3 + ", wa4:" + wa4);
+
+        return [ws1, ws2, ws3, ws4, wa1, wa2, wa3, wa4];
+    },
 
     'init': function () {
-        $("#start").bind({
+        $("#reset").bind({
             click: this.resetBot
         });
         $("#go").bind({
             click: this.go
         });
         $(document).keydown(this.checkKey);
+        this.resetBot();
     },
 
-    'checkKey': function(event ){
-        console.log('key: '+event.which);
-        if(event.which == 39){
+    'checkKey': function (event) {
+        console.log('key: ' + event.which);
+        if (event.which == 39) {
             event.preventDefault();
             var x = parseInt($("#rcw_slider").val()) + 1;
-            if(x <= 10){
+            if (x <= 10) {
                 $("#rcw_slider").val(x);
-                $("#rcw_label_id").text(x/10);
+                $("#rcw_label_id").text(x / 10);
             }
-        }else if(event.which == 37){
+        } else if (event.which == 37) {
             event.preventDefault();
             var x = parseInt($("#rcw_slider").val()) - 1;
-            if(x >= -10){
+            if (x >= -10) {
                 $("#rcw_slider").val(x);
-                $("#rcw_label_id").text(x/10);
+                $("#rcw_label_id").text(x / 10);
             }
-        }else if(event.which == 87){
+        } else if (event.which == 87) {
             event.preventDefault();
             var x = parseInt($("#fwd_slider").val()) + 1;
-            if(x <= 10){
+            if (x <= 10) {
                 $("#fwd_slider").val(x);
-                $("#fwd_label_id").text(x/10);
+                $("#fwd_label_id").text(x / 10);
             }
-        }else if(event.which == 83){
+        } else if (event.which == 83) {
             event.preventDefault();
             var x = parseInt($("#fwd_slider").val()) - 1;
-            if(x >= -10){
+            if (x >= -10) {
                 $("#fwd_slider").val(x);
-                $("#fwd_label_id").text(x/10);
+                $("#fwd_label_id").text(x / 10);
             }
-        }else if(event.which == 65){
+        } else if (event.which == 65) {
             event.preventDefault();
             var x = parseInt($("#str_slider").val()) - 1;
-            if(x >= -10){
+            if (x >= -10) {
                 $("#str_slider").val(x);
-                $("#str_label_id").text(x/10);
+                $("#str_label_id").text(x / 10);
             }
-        }else if(event.which == 68){
+        } else if (event.which == 68) {
             event.preventDefault();
             var x = parseInt($("#str_slider").val()) + 1;
-            if(x <= 10){
+            if (x <= 10) {
                 $("#str_slider").val(x);
-                $("#str_label_id").text(x/10);
+                $("#str_label_id").text(x / 10);
             }
         }
+        return true;
     },
-    
+
     'resetBot': function () {
         app.dimensions.track = parseFloat($("#track").val());
         app.dimensions.wheelbase = parseFloat($("#wheelbase").val());
-        app.scale = parseFloat($("#scale").val());
+        app.scale = parseFloat($("#scale_label_id").text());
+        app.speed = parseFloat($("#speed_label_id").text());
 
         app.wheelPlacement.rf = [app.dimensions.track, app.dimensions.wheelbase];
         app.wheelPlacement.lf = [0, app.dimensions.wheelbase];
@@ -167,62 +204,24 @@ var app = {
     'newCoordiates': function (xy, a, h) {
         console.log("a:" + a + ", h:" + h);
         var result = new Array(2);
-        var speedFactor = .5;
         if (a >= 0 && a < 90) {
-            result[0] = xy[0] + (Math.sin(a * Math.PI / 180) * h * speedFactor);
-            result[1] = xy[1] + (Math.cos(a * Math.PI / 180) * h * speedFactor);
+            result[0] = xy[0] + (Math.sin(a * Math.PI / 180) * h * app.speed);
+            result[1] = xy[1] + (Math.cos(a * Math.PI / 180) * h * app.speed);
         } else if (a >= 90 && a <= 180) {
-            result[0] = xy[0] + (Math.cos((a - 90) * Math.PI / 180) * h * speedFactor);
-            result[1] = xy[1] - (Math.sin((a - 90) * Math.PI / 180) * h * speedFactor);
+            result[0] = xy[0] + (Math.cos((a - 90) * Math.PI / 180) * h * app.speed);
+            result[1] = xy[1] - (Math.sin((a - 90) * Math.PI / 180) * h * app.speed);
         } else if (a < 0 && a > -90) {
-            result[0] = xy[0] - (Math.sin(Math.abs(a) * Math.PI / 180) * h * speedFactor);
-            result[1] = xy[1] + (Math.cos(Math.abs(a) * Math.PI / 180) * h * speedFactor);
+            result[0] = xy[0] - (Math.sin(Math.abs(a) * Math.PI / 180) * h * app.speed);
+            result[1] = xy[1] + (Math.cos(Math.abs(a) * Math.PI / 180) * h * app.speed);
         } else if (a <= -90 && a >= -180) {
-            result[0] = xy[0] - (Math.cos((Math.abs(a) - 90) * Math.PI / 180) * h * speedFactor);
-            result[1] = xy[1] - (Math.sin((Math.abs(a) - 90) * Math.PI / 180) * h * speedFactor);
+            result[0] = xy[0] - (Math.cos((Math.abs(a) - 90) * Math.PI / 180) * h * app.speed);
+            result[1] = xy[1] - (Math.sin((Math.abs(a) - 90) * Math.PI / 180) * h * app.speed);
         }
         return result;
     },
 
     'distance': function (c1, c2) {
         return Math.sqrt(Math.pow(c2[0] - c1[0], 2) + Math.pow(c2[1] - c1[1], 2));
-    },
-
-    'swerveCalc': function (fwd, str, rcw) {
-        fwd = fwd;
-        str = str;
-        rcw = rcw;
-
-        var r = Math.sqrt(Math.pow(app.dimensions.wheelbase, 2) + Math.pow(app.dimensions.track, 2));
-        var a = str - rcw * (app.dimensions.wheelbase / r);
-        var b = str + rcw * (app.dimensions.wheelbase / r);
-        var c = fwd - rcw * (app.dimensions.track / r);
-        var d = fwd + rcw * (app.dimensions.track / r);
-        console.log("r:" + r + ", a:" + a + ", b:" + b + ", c:" + c + ", d:" + d);
-
-        var ws1 = Math.sqrt(Math.pow(b, 2) + Math.pow(c, 2));
-        var maxWs = ws1;
-        var ws2 = Math.sqrt(Math.pow(b, 2) + Math.pow(d, 2));
-        maxWs = ws2 > maxWs ? ws2 : maxWs;
-        var ws3 = Math.sqrt(Math.pow(a, 2) + Math.pow(d, 2));
-        maxWs = ws3 > maxWs ? ws3 : maxWs;
-        var ws4 = Math.sqrt(Math.pow(a, 2) + Math.pow(c, 2));
-        maxWs = ws4 > maxWs ? ws4 : maxWs;
-
-        ws1 = maxWs > 1 ? ws1 / maxWs : ws1;
-        ws2 = maxWs > 1 ? ws2 / maxWs : ws2;
-        ws3 = maxWs > 1 ? ws3 / maxWs : ws3;
-        ws4 = maxWs > 1 ? ws4 / maxWs : ws4;
-        console.log("ws1:" + ws1 + ", ws2:" + ws2 + ", ws3:" + ws3 + ", ws4:" + ws4 + ", maxws:" + maxWs);
-
-        var wa1 = (c == 0 && b == 0) ? 0.0 : (Math.atan2(b, c) * 180 / Math.PI);
-        var wa2 = (d == 0 && b == 0) ? 0.0 : (Math.atan2(b, d) * 180 / Math.PI);
-        var wa3 = (d == 0 && a == 0) ? 0.0 : (Math.atan2(a, d) * 180 / Math.PI);
-        var wa4 = (c == 0 && a == 0) ? 0.0 : (Math.atan2(a, c) * 180 / Math.PI);
-        console.log("wa1:" + wa1 + ", wa2:" + wa2 + ", wa3:" + wa3 + ", wa4:" + wa4);
-
-        return [ws1, ws2, ws3, ws4, wa1, wa2, wa3, wa4];
     }
-
 }
 app.init();
