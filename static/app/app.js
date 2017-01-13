@@ -11,8 +11,12 @@ var app = {
         'rr': [0, 0]
     },
     
+    // this is the only function you need to look at
     // calculate angle and proportional speed of each drive unit
     // model found on the chiefdelphi site
+    // fwd, str and rcw are ratios -1 to 1
+    // returns array(8) first 4 are speed starting rf going ccw
+    //                  second 4 are angle of attack starting at rf and going cw
     'swerveCalc': function (fwd, str, rcw) {
         var r = Math.sqrt(Math.pow(app.dimensions.wheelbase, 2) + Math.pow(app.dimensions.track, 2));
         var a = str - rcw * (app.dimensions.wheelbase / r);
@@ -21,6 +25,7 @@ var app = {
         var d = fwd + rcw * (app.dimensions.track / r);
         console.log("r:" + r + ", a:" + a + ", b:" + b + ", c:" + c + ", d:" + d);
 
+        // speeds
         var ws1 = Math.sqrt(Math.pow(b, 2) + Math.pow(c, 2));
         var maxWs = ws1;
         var ws2 = Math.sqrt(Math.pow(b, 2) + Math.pow(d, 2));
@@ -36,6 +41,7 @@ var app = {
         ws4 = maxWs > 1 ? ws4 / maxWs : ws4;
         console.log("ws1:" + ws1 + ", ws2:" + ws2 + ", ws3:" + ws3 + ", ws4:" + ws4 + ", maxws:" + maxWs);
 
+        // angles
         var wa1 = (c == 0 && b == 0) ? 0.0 : (Math.atan2(b, c) * 180 / Math.PI);
         var wa2 = (d == 0 && b == 0) ? 0.0 : (Math.atan2(b, d) * 180 / Math.PI);
         var wa3 = (d == 0 && a == 0) ? 0.0 : (Math.atan2(a, d) * 180 / Math.PI);
@@ -57,7 +63,7 @@ var app = {
     },
 
     'checkKey': function (event) {
-        console.log('key: ' + event.which);
+//        console.log('key: ' + event.which);
         if (event.which == 39) {
             event.preventDefault();
             var x = parseInt($("#rcw_slider").val()) + 1;
@@ -129,8 +135,9 @@ var app = {
             if (amount > iterations) {
                 amount = 0;
                 clearInterval(interval);
+            } else {
+                app.move();
             }
-            app.move();
         }, 100);
     },
 
@@ -201,25 +208,29 @@ var app = {
         ctx.stroke();
     },
 
-    'newCoordiates': function (xy, a, h) {
+    'newCoordiates': function(xy, a, h) {
         console.log("a:" + a + ", h:" + h);
+        
         var result = new Array(2);
-        if (a >= 0 && a < 90) {
-            result[0] = xy[0] + (Math.sin(a * Math.PI / 180) * h * app.speed);
-            result[1] = xy[1] + (Math.cos(a * Math.PI / 180) * h * app.speed);
-        } else if (a >= 90 && a <= 180) {
-            result[0] = xy[0] + (Math.cos((a - 90) * Math.PI / 180) * h * app.speed);
-            result[1] = xy[1] - (Math.sin((a - 90) * Math.PI / 180) * h * app.speed);
-        } else if (a < 0 && a > -90) {
-            result[0] = xy[0] - (Math.sin(Math.abs(a) * Math.PI / 180) * h * app.speed);
-            result[1] = xy[1] + (Math.cos(Math.abs(a) * Math.PI / 180) * h * app.speed);
-        } else if (a <= -90 && a >= -180) {
-            result[0] = xy[0] - (Math.cos((Math.abs(a) - 90) * Math.PI / 180) * h * app.speed);
-            result[1] = xy[1] - (Math.sin((Math.abs(a) - 90) * Math.PI / 180) * h * app.speed);
-        }
+        // 1. determine delta direction from angle, save sign
+        var xs = (a >= 0) ? 1 : -1;
+        var ys = (Math.abs(a) > 90 ) ? -1 : 1;
+        
+        // 2. absolute angle and transform from 0 degrees up to right
+        var a = Math.abs(a);
+        var ab = (a > 90) ? (a - 90) : (90 - a);
+        
+        // 3. convert to radians and calculate delta
+        // ** think fp size error introduced here
+        var ar = parseFloat(Number(ab * Math.PI / 180).toFixed(4));
+        var xd = parseFloat(Number(Math.cos(ar) * h * xs * app.speed).toFixed(4));
+        var yd = parseFloat(Number(Math.sin(ar) * h * ys * app.speed).toFixed(4));
+        console.log("xy:"+xy[0]+","+xy[1]+", xd:"+xd+", yd:"+yd);
+        result[0] = xy[0] + xd;
+        result[1] = xy[1] + yd;
         return result;
     },
-
+    
     'distance': function (c1, c2) {
         return Math.sqrt(Math.pow(c2[0] - c1[0], 2) + Math.pow(c2[1] - c1[1], 2));
     }
