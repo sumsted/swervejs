@@ -15,11 +15,59 @@ var app = {
         $("#start").bind({
             click: this.resetBot
         });
-        $("#move").bind({
-            click: this.move
+        $("#go").bind({
+            click: this.go
         });
+        $(document).keydown(this.checkKey);
     },
 
+    'checkKey': function(event ){
+        console.log('key: '+event.which);
+        if(event.which == 39){
+            event.preventDefault();
+            var x = parseInt($("#rcw_slider").val()) + 1;
+            if(x <= 10){
+                $("#rcw_slider").val(x);
+                $("#rcw_label_id").text(x/10);
+            }
+        }else if(event.which == 37){
+            event.preventDefault();
+            var x = parseInt($("#rcw_slider").val()) - 1;
+            if(x >= -10){
+                $("#rcw_slider").val(x);
+                $("#rcw_label_id").text(x/10);
+            }
+        }else if(event.which == 87){
+            event.preventDefault();
+            var x = parseInt($("#fwd_slider").val()) + 1;
+            if(x <= 10){
+                $("#fwd_slider").val(x);
+                $("#fwd_label_id").text(x/10);
+            }
+        }else if(event.which == 83){
+            event.preventDefault();
+            var x = parseInt($("#fwd_slider").val()) - 1;
+            if(x >= -10){
+                $("#fwd_slider").val(x);
+                $("#fwd_label_id").text(x/10);
+            }
+        }else if(event.which == 65){
+            event.preventDefault();
+            var x = parseInt($("#str_slider").val()) - 1;
+            if(x >= -10){
+                $("#str_slider").val(x);
+                $("#str_label_id").text(x/10);
+            }
+        }else if(event.which == 68){
+            event.preventDefault();
+            var x = parseInt($("#str_slider").val()) + 1;
+            if(x <= 10){
+                $("#str_slider").val(x);
+                $("#str_label_id").text(x/10);
+            }
+        }
+    },
+    
     'resetBot': function () {
         app.dimensions.track = parseFloat($("#track").val());
         app.dimensions.wheelbase = parseFloat($("#wheelbase").val());
@@ -36,11 +84,24 @@ var app = {
 
     'clear': function () {},
 
+    'go': function () {
+        var iterations = parseInt($("#iterations_label_id").text());
+        var amount = 0;
+        var interval = setInterval(function () {
+            amount += 1;
+            if (amount > iterations) {
+                amount = 0;
+                clearInterval(interval);
+            }
+            app.move();
+        }, 100);
+    },
+
     'move': function () {
         // get fwd, str, rcw
-        var fwd = parseFloat($("#fwd").val());
-        var str = parseFloat($("#str").val());
-        var rcw = parseFloat($("#rcw").val());
+        var fwd = parseFloat($("#fwd_label_id").text());
+        var str = parseFloat($("#str_label_id").text());
+        var rcw = parseFloat($("#rcw_label_id").text());
 
         // calc swerve
         var swerve = app.swerveCalc(fwd, str, rcw);
@@ -70,10 +131,10 @@ var app = {
         $("#rrx").text(app.wheelPlacement.rr[0]);
         $("#rry").text(app.wheelPlacement.rr[1]);
 
-        $("#rflf").text(app.distance(app.wheelPlacement.rf,app.wheelPlacement.lf));
-        $("#lflr").text(app.distance(app.wheelPlacement.lf,app.wheelPlacement.lr));
-        $("#lrrr").text(app.distance(app.wheelPlacement.lr,app.wheelPlacement.rr));
-        $("#rrrf").text(app.distance(app.wheelPlacement.rr,app.wheelPlacement.rf));
+        $("#rflf").text(app.distance(app.wheelPlacement.rf, app.wheelPlacement.lf));
+        $("#lflr").text(app.distance(app.wheelPlacement.lf, app.wheelPlacement.lr));
+        $("#lrrr").text(app.distance(app.wheelPlacement.lr, app.wheelPlacement.rr));
+        $("#rrrf").text(app.distance(app.wheelPlacement.rr, app.wheelPlacement.rf));
 
         app.redraw();
     },
@@ -81,7 +142,7 @@ var app = {
     'transformIt': function () {
         var s = new Array(4);
         var midX = 400;
-        var midY = 400;
+        var midY = 600;
         s[0] = [midX + (app.wheelPlacement.rf[0] * app.scale), midY - (app.wheelPlacement.rf[1] * app.scale)];
         s[1] = [midX + (app.wheelPlacement.lf[0] * app.scale), midY - (app.wheelPlacement.lf[1] * app.scale)];
         s[2] = [midX + (app.wheelPlacement.lr[0] * app.scale), midY - (app.wheelPlacement.lr[1] * app.scale)];
@@ -93,6 +154,8 @@ var app = {
         var s = app.transformIt();
         var c = document.getElementById("botland");
         var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.beginPath();
         ctx.moveTo(s[0][0], s[0][1]);
         ctx.lineTo(s[1][0], s[1][1]);
         ctx.lineTo(s[2][0], s[2][1]);
@@ -102,34 +165,34 @@ var app = {
     },
 
     'newCoordiates': function (xy, a, h) {
-        console.log("a:"+a+", h:"+h);
+        console.log("a:" + a + ", h:" + h);
         var result = new Array(2);
         var speedFactor = .5;
-        if(a >= 0 && a < 90){
-            result[0] = xy[0] + (Math.sin(a*Math.PI/180) * h * speedFactor);            
-            result[1] = xy[1] + (Math.cos(a*Math.PI/180) * h * speedFactor);
-        } else if(a >= 90 && a <= 180){
-            result[0] = xy[0] + (Math.cos((a-90)*Math.PI/180) * h * speedFactor);
-            result[1] = xy[1] - (Math.sin((a-90)*Math.PI/180) * h * speedFactor);            
-        } else if(a < 0 && a > -90) {
-            result[0] = xy[0] - (Math.sin(Math.abs(a)*Math.PI/180) * h * speedFactor);            
-            result[1] = xy[1] + (Math.cos(Math.abs(a)*Math.PI/180) * h * speedFactor);
-        } else if(a <= -90 && a >= -180) {
-            result[0] = xy[0] - (Math.cos((Math.abs(a)-90)*Math.PI/180) * h * speedFactor);
-            result[1] = xy[1] - (Math.sin((Math.abs(a)-90)*Math.PI/180) * h * speedFactor);            
+        if (a >= 0 && a < 90) {
+            result[0] = xy[0] + (Math.sin(a * Math.PI / 180) * h * speedFactor);
+            result[1] = xy[1] + (Math.cos(a * Math.PI / 180) * h * speedFactor);
+        } else if (a >= 90 && a <= 180) {
+            result[0] = xy[0] + (Math.cos((a - 90) * Math.PI / 180) * h * speedFactor);
+            result[1] = xy[1] - (Math.sin((a - 90) * Math.PI / 180) * h * speedFactor);
+        } else if (a < 0 && a > -90) {
+            result[0] = xy[0] - (Math.sin(Math.abs(a) * Math.PI / 180) * h * speedFactor);
+            result[1] = xy[1] + (Math.cos(Math.abs(a) * Math.PI / 180) * h * speedFactor);
+        } else if (a <= -90 && a >= -180) {
+            result[0] = xy[0] - (Math.cos((Math.abs(a) - 90) * Math.PI / 180) * h * speedFactor);
+            result[1] = xy[1] - (Math.sin((Math.abs(a) - 90) * Math.PI / 180) * h * speedFactor);
         }
         return result;
     },
 
-    'distance': function(c1,c2){
-        return Math.sqrt(Math.pow(c2[0]-c1[0],2)+Math.pow(c2[1]-c1[1],2));
+    'distance': function (c1, c2) {
+        return Math.sqrt(Math.pow(c2[0] - c1[0], 2) + Math.pow(c2[1] - c1[1], 2));
     },
 
     'swerveCalc': function (fwd, str, rcw) {
         fwd = fwd;
         str = str;
         rcw = rcw;
-        
+
         var r = Math.sqrt(Math.pow(app.dimensions.wheelbase, 2) + Math.pow(app.dimensions.track, 2));
         var a = str - rcw * (app.dimensions.wheelbase / r);
         var b = str + rcw * (app.dimensions.wheelbase / r);
