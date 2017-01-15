@@ -203,13 +203,38 @@ var app = {
         var c = document.getElementById("botland");
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height);
+
         ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'green';
         ctx.moveTo(s[0][0], s[0][1]);
         ctx.lineTo(s[1][0], s[1][1]);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'black';
+        ctx.moveTo(s[1][0], s[1][1]);
         ctx.lineTo(s[2][0], s[2][1]);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'red';
+        ctx.moveTo(s[2][0], s[2][1]);
         ctx.lineTo(s[3][0], s[3][1]);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'black';
+        ctx.moveTo(s[3][0], s[3][1]);
         ctx.lineTo(s[0][0], s[0][1]);
         ctx.stroke();
+        ctx.closePath();
     },
 
     'newCoordinates': function(fwd, str, rcw){
