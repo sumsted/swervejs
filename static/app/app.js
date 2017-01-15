@@ -64,42 +64,42 @@ var app = {
 
     'checkKey': function (event) {
 //        console.log('key: ' + event.which);
-        if (event.which == 39) {
+        if (event.which == 68) {
             event.preventDefault();
             var x = parseInt($("#rcw_slider").val()) + 1;
             if (x <= 10) {
                 $("#rcw_slider").val(x);
                 $("#rcw_label_id").text(x / 10);
             }
-        } else if (event.which == 37) {
+        } else if (event.which == 65) {
             event.preventDefault();
             var x = parseInt($("#rcw_slider").val()) - 1;
             if (x >= -10) {
                 $("#rcw_slider").val(x);
                 $("#rcw_label_id").text(x / 10);
             }
-        } else if (event.which == 87) {
+        } else if (event.which == 87 || event.which == 38) {
             event.preventDefault();
             var x = parseInt($("#fwd_slider").val()) + 1;
             if (x <= 10) {
                 $("#fwd_slider").val(x);
                 $("#fwd_label_id").text(x / 10);
             }
-        } else if (event.which == 83) {
+        } else if (event.which == 83 || event.which == 40) {
             event.preventDefault();
             var x = parseInt($("#fwd_slider").val()) - 1;
             if (x >= -10) {
                 $("#fwd_slider").val(x);
                 $("#fwd_label_id").text(x / 10);
             }
-        } else if (event.which == 65) {
+        } else if (event.which == 37) {
             event.preventDefault();
             var x = parseInt($("#str_slider").val()) - 1;
             if (x >= -10) {
                 $("#str_slider").val(x);
                 $("#str_label_id").text(x / 10);
             }
-        } else if (event.which == 68) {
+        } else if (event.which == 39) {
             event.preventDefault();
             var x = parseInt($("#str_slider").val()) + 1;
             if (x <= 10) {
@@ -218,7 +218,7 @@ var app = {
 
         // 2. rotate bot corners around new center point
         var rd = rcw * -.1;  // set arbitray radians as function of rcw and flip for ccw
-        
+
         var tx = app.wheelPlacement.rf[0] - app.center[0];
         var ty = app.wheelPlacement.rf[1] - app.center[1];
         var rrfx = tx*Math.cos(rd) - ty*Math.sin(rd);

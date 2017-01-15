@@ -10,4 +10,4 @@ Use fwd, str, and rcw to set values for model.
 
 Set iterations to visualize. You can change fwd, str, and rcw while model is running.
 
-You can use WSAD to control fwd and str. Left and right arrows control rcw.
+Arrows control fwd and str. Keys A and D control rcw. Keys W and S can also control fwd and str.
