@@ -106,6 +106,11 @@ var app = {
                 $("#str_slider").val(x);
                 $("#str_label_id").text(x / 10);
             }
+        } else if(event.which == 32){
+            event.preventDefault();
+            $("#iterations_slider").val(10);
+            $("#iterations_label_id").text(10);
+            app.move();
         }
         return true;
     },
