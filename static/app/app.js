@@ -111,15 +111,17 @@ var app = {
     },
 
     'resetBot': function () {
-        app.dimensions.track = parseFloat($("#track").val());
-        app.dimensions.wheelbase = parseFloat($("#wheelbase").val());
         app.scale = parseFloat($("#scale_label_id").text());
         app.speed = parseFloat($("#speed_label_id").text());
 
-        app.wheelPlacement.rf = [app.dimensions.track, app.dimensions.wheelbase];
-        app.wheelPlacement.lf = [0, app.dimensions.wheelbase];
+        app.dimensions.track = parseFloat($("#track").val());
+        app.dimensions.wheelbase = parseFloat($("#wheelbase").val());
+
+        app.wheelPlacement.rf = [app.dimensions.track * app.scale, app.dimensions.wheelbase * app.scale];
+        app.wheelPlacement.lf = [0, app.dimensions.wheelbase * app.scale];
         app.wheelPlacement.lr = [0, 0];
-        app.wheelPlacement.rr = [app.dimensions.track, 0];
+        app.wheelPlacement.rr = [app.dimensions.track * app.scale, 0];
+        app.center = [app.dimensions.track*app.scale/2,app.dimensions.wheelbase*app.scale/2];
 
         app.clear();
         app.redraw();
@@ -150,11 +152,8 @@ var app = {
         // calc swerve
         var swerve = app.swerveCalc(fwd, str, rcw);
 
-        // recaclulate new positions for canvas
-        app.wheelPlacement.rf = app.newCoordiates(app.wheelPlacement.rf, swerve[4], swerve[0]);
-        app.wheelPlacement.lf = app.newCoordiates(app.wheelPlacement.lf, swerve[5], swerve[1]);
-        app.wheelPlacement.lr = app.newCoordiates(app.wheelPlacement.lr, swerve[6], swerve[2]);
-        app.wheelPlacement.rr = app.newCoordiates(app.wheelPlacement.rr, swerve[7], swerve[3]);
+        // recalc position on screen
+        app.newCoordinates(fwd, str, rcw);
 
         // update table
         $("#rfv").text(swerve[0]);
@@ -187,10 +186,10 @@ var app = {
         var s = new Array(4);
         var midX = 400;
         var midY = 600;
-        s[0] = [midX + (app.wheelPlacement.rf[0] * app.scale), midY - (app.wheelPlacement.rf[1] * app.scale)];
-        s[1] = [midX + (app.wheelPlacement.lf[0] * app.scale), midY - (app.wheelPlacement.lf[1] * app.scale)];
-        s[2] = [midX + (app.wheelPlacement.lr[0] * app.scale), midY - (app.wheelPlacement.lr[1] * app.scale)];
-        s[3] = [midX + (app.wheelPlacement.rr[0] * app.scale), midY - (app.wheelPlacement.rr[1] * app.scale)];
+        s[0] = [midX + (app.wheelPlacement.rf[0]), midY - (app.wheelPlacement.rf[1])];
+        s[1] = [midX + (app.wheelPlacement.lf[0]), midY - (app.wheelPlacement.lf[1])];
+        s[2] = [midX + (app.wheelPlacement.lr[0]), midY - (app.wheelPlacement.lr[1])];
+        s[3] = [midX + (app.wheelPlacement.rr[0]), midY - (app.wheelPlacement.rr[1])];
         return s;
     },
 
@@ -208,29 +207,47 @@ var app = {
         ctx.stroke();
     },
 
-    'newCoordiates': function(xy, a, h) {
-        console.log("a:" + a + ", h:" + h);
+    'newCoordinates': function(fwd, str, rcw){
+
+        // 1. position current bot on grid
+        app.wheelPlacement.rf = [app.wheelPlacement.rf[0] + str * app.scale, app.wheelPlacement.rf[1] + fwd * app.scale];
+        app.wheelPlacement.lf = [app.wheelPlacement.lf[0] + str * app.scale, app.wheelPlacement.lf[1] + fwd * app.scale];
+        app.wheelPlacement.lr = [app.wheelPlacement.lr[0] + str * app.scale, app.wheelPlacement.lr[1] + fwd * app.scale];
+        app.wheelPlacement.rr = [app.wheelPlacement.rr[0] + str * app.scale, app.wheelPlacement.rr[1] + fwd * app.scale];
+        app.center = [app.center[0] + str * app.scale, app.center[1] + fwd * app.scale];
+
+        // 2. rotate bot corners around new center point
+        var rd = rcw * -.1;  // set arbitray radians as function of rcw and flip for ccw
         
-        var result = new Array(2);
-        // 1. determine delta direction from angle, save sign
-        var xs = (a >= 0) ? 1 : -1;
-        var ys = (Math.abs(a) > 90 ) ? -1 : 1;
-        
-        // 2. absolute angle and transform from 0 degrees up to right
-        var a = Math.abs(a);
-        var ab = (a > 90) ? (a - 90) : (90 - a);
-        
-        // 3. convert to radians and calculate delta
-        // ** think fp size error introduced here
-        var ar = parseFloat(Number(ab * Math.PI / 180).toFixed(4));
-        var xd = parseFloat(Number(Math.cos(ar) * h * xs * app.speed).toFixed(4));
-        var yd = parseFloat(Number(Math.sin(ar) * h * ys * app.speed).toFixed(4));
-        console.log("xy:"+xy[0]+","+xy[1]+", xd:"+xd+", yd:"+yd);
-        result[0] = xy[0] + xd;
-        result[1] = xy[1] + yd;
-        return result;
+        var tx = app.wheelPlacement.rf[0] - app.center[0];
+        var ty = app.wheelPlacement.rf[1] - app.center[1];
+        var rrfx = tx*Math.cos(rd) - ty*Math.sin(rd);
+        var rrfy = tx*Math.sin(rd) + ty*Math.cos(rd);
+        app.wheelPlacement.rf[0] = rrfx + app.center[0];
+        app.wheelPlacement.rf[1] = rrfy + app.center[1];
+
+        tx = app.wheelPlacement.lf[0] - app.center[0];
+        ty = app.wheelPlacement.lf[1] - app.center[1];
+        var rlfx = tx*Math.cos(rd) - ty*Math.sin(rd);
+        var rlfy = tx*Math.sin(rd) + ty*Math.cos(rd);
+        app.wheelPlacement.lf[0] = rlfx + app.center[0];
+        app.wheelPlacement.lf[1] = rlfy + app.center[1];
+
+        tx = app.wheelPlacement.lr[0] - app.center[0];
+        ty = app.wheelPlacement.lr[1] - app.center[1];
+        var rlrx = tx*Math.cos(rd) - ty*Math.sin(rd);
+        var rlry = tx*Math.sin(rd) + ty*Math.cos(rd);
+        app.wheelPlacement.lr[0] = rlrx + app.center[0];
+        app.wheelPlacement.lr[1] = rlry + app.center[1];
+
+        tx = app.wheelPlacement.rr[0] - app.center[0];
+        ty = app.wheelPlacement.rr[1] - app.center[1];
+        var rrrx = tx*Math.cos(rd) - ty*Math.sin(rd);
+        var rrry = tx*Math.sin(rd) + ty*Math.cos(rd);
+        app.wheelPlacement.rr[0] = rrrx + app.center[0];
+        app.wheelPlacement.rr[1] = rrry + app.center[1];
     },
-    
+
     'distance': function (c1, c2) {
         return Math.sqrt(Math.pow(c2[0] - c1[0], 2) + Math.pow(c2[1] - c1[1], 2));
     }
