@@ -235,6 +235,7 @@ var app = {
         ctx.lineTo(s[0][0], s[0][1]);
         ctx.stroke();
         ctx.closePath();
+        app.drawAirship(400, 200, 1.75);
     },
 
     'newCoordinates': function(fwd, str, rcw){
@@ -280,6 +281,35 @@ var app = {
 
     'distance': function (c1, c2) {
         return Math.sqrt(Math.pow(c2[0] - c1[0], 2) + Math.pow(c2[1] - c1[1], 2));
+    },
+
+    'drawAirship': function(ox, oy, scale){
+        var o = 51*scale;
+        var h = o / (Math.sin(60*Math.PI/180))
+        var a = Math.cos(60*Math.PI/180)*h
+        var points = [
+            [a+ox,2*o+oy],
+            [0+ox,o+oy],
+            [a+ox,0+oy],
+            [3*a+ox,0+oy],
+            [4*a+ox,o+oy],
+            [3*a+ox,2*o+oy]
+            ];
+        var c = document.getElementById("botland");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'blue';
+        for(var i=0;i<points.length;i++){
+            if(i==0){
+                ctx.moveTo(points[i][0], points[i][1]);
+            }else{
+                ctx.lineTo(points[i][0], points[i][1]);
+            }
+        }
+        ctx.lineTo(points[0][0], points[0][1]);
+        ctx.stroke();
+        ctx.closePath();
     }
 }
 app.init();
