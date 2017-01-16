@@ -63,50 +63,77 @@ var app = {
     },
 
     'checkKey': function (event) {
-//        console.log('key: ' + event.which);
-        if (event.which == 68) {
+        /*
+         *  W S A D = 87 , 83 , 65 , 68
+         *  U D L R =  38 , 40, 37 , 39
+         *  Space   = 32
+         */
+        var wsad = $("#wsad_slider").val();
+        if(wsad == 1){
+            var upKey = 87;
+            var downKey = 83;
+            var altUpKey =  38;
+            var altDownKey = 40;
+            var leftKey = 65;
+            var rightKey = 68;
+            var rotCWKey = 39;
+            var rotCCWKey = 37;
+            var jumpKey = 32;
+        }else{
+            upKey = 38;
+            downKey = 40;
+            altUpKey = 87;
+            altDownKey = 83;
+            leftKey = 37;
+            rightKey = 39;
+            rotCWKey = 68;
+            rotCCWKey = 65;
+            jumpKey = 32;
+        }
+        //console.log('key: ' + event.which);
+        if (event.which == rotCWKey) {
             event.preventDefault();
             var x = parseInt($("#rcw_slider").val()) + 1;
             if (x <= 10) {
                 $("#rcw_slider").val(x);
                 $("#rcw_label_id").text(x / 10);
             }
-        } else if (event.which == 65) {
+        } else if (event.which == rotCCWKey) {
             event.preventDefault();
             var x = parseInt($("#rcw_slider").val()) - 1;
             if (x >= -10) {
                 $("#rcw_slider").val(x);
                 $("#rcw_label_id").text(x / 10);
             }
-        } else if (event.which == 87 || event.which == 38) {
+        } else if (event.which == upKey || event.which == altUpKey) {
             event.preventDefault();
             var x = parseInt($("#fwd_slider").val()) + 1;
             if (x <= 10) {
                 $("#fwd_slider").val(x);
                 $("#fwd_label_id").text(x / 10);
             }
-        } else if (event.which == 83 || event.which == 40) {
+        } else if (event.which == downKey || event.which == altDownKey) {
             event.preventDefault();
             var x = parseInt($("#fwd_slider").val()) - 1;
             if (x >= -10) {
                 $("#fwd_slider").val(x);
                 $("#fwd_label_id").text(x / 10);
             }
-        } else if (event.which == 37) {
+        } else if (event.which == leftKey) {
             event.preventDefault();
             var x = parseInt($("#str_slider").val()) - 1;
             if (x >= -10) {
                 $("#str_slider").val(x);
                 $("#str_label_id").text(x / 10);
             }
-        } else if (event.which == 39) {
+        } else if (event.which == rightKey) {
             event.preventDefault();
             var x = parseInt($("#str_slider").val()) + 1;
             if (x <= 10) {
                 $("#str_slider").val(x);
                 $("#str_label_id").text(x / 10);
             }
-        } else if(event.which == 32){
+        } else if(event.which == jumpKey){
             event.preventDefault();
             $("#iterations_slider").val(10);
             $("#iterations_label_id").text(10);
@@ -135,17 +162,32 @@ var app = {
     'clear': function () {},
 
     'go': function () {
-        var iterations = parseInt($("#iterations_label_id").text());
-        var amount = 0;
-        var interval = setInterval(function () {
-            amount += 1;
-            if (amount > iterations) {
-                amount = 0;
-                clearInterval(interval);
-            } else {
-                app.move();
-            }
-        }, 100);
+        var continuous = $("#continuous_slider").val();
+        if(continuous == 1){
+            var amount = 0;
+            var interval = setInterval(function () {
+                amount += 1;
+                continuous = $("#continuous_slider").val();
+                if (continuous == 0) {
+                    amount = 0;
+                    clearInterval(interval);
+                } else {
+                    app.move();
+                }
+            }, 100);
+        }else{
+            var iterations = parseInt($("#iterations_label_id").text());
+            var amount = 0;
+            var interval = setInterval(function () {
+                amount += 1;
+                if (amount > iterations) {
+                    amount = 0;
+                    clearInterval(interval);
+                } else {
+                    app.move();
+                }
+            }, 100);
+        }
     },
 
     'move': function () {
@@ -284,32 +326,35 @@ var app = {
     },
 
     'drawAirship': function(ox, oy, scale){
-        var o = 51*scale;
-        var h = o / (Math.sin(60*Math.PI/180))
-        var a = Math.cos(60*Math.PI/180)*h
-        var points = [
-            [a+ox,2*o+oy],
-            [0+ox,o+oy],
-            [a+ox,0+oy],
-            [3*a+ox,0+oy],
-            [4*a+ox,o+oy],
-            [3*a+ox,2*o+oy]
-            ];
-        var c = document.getElementById("botland");
-        var ctx = c.getContext("2d");
-        ctx.beginPath();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'blue';
-        for(var i=0;i<points.length;i++){
-            if(i==0){
-                ctx.moveTo(points[i][0], points[i][1]);
-            }else{
-                ctx.lineTo(points[i][0], points[i][1]);
+        var airship = $("#airship_slider").val();
+        if(airship == 1){
+            var o = 51*scale;
+            var h = o / (Math.sin(60*Math.PI/180))
+            var a = Math.cos(60*Math.PI/180)*h
+            var points = [
+                [a+ox,2*o+oy],
+                [0+ox,o+oy],
+                [a+ox,0+oy],
+                [3*a+ox,0+oy],
+                [4*a+ox,o+oy],
+                [3*a+ox,2*o+oy]
+                ];
+            var c = document.getElementById("botland");
+            var ctx = c.getContext("2d");
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'blue';
+            for(var i=0;i<points.length;i++){
+                if(i==0){
+                    ctx.moveTo(points[i][0], points[i][1]);
+                }else{
+                    ctx.lineTo(points[i][0], points[i][1]);
+                }
             }
+            ctx.lineTo(points[0][0], points[0][1]);
+            ctx.stroke();
+            ctx.closePath();
         }
-        ctx.lineTo(points[0][0], points[0][1]);
-        ctx.stroke();
-        ctx.closePath();
     }
 }
 app.init();
