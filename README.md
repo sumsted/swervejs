@@ -11,3 +11,4 @@ Use fwd, str, and rcw to set values for model.
 Set iterations to visualize. You can change fwd, str, and rcw while model is running.
 
 Arrows control fwd and str. Keys A and D control rcw. Keys W and S can also control fwd and str. Pressing the space bar will give you 10 iterations.
+
